@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+<rect width="120" height="120" rx="24" fill="#FF6A1A"/>
+<g transform="translate(60 60) scale(0.84) translate(-60 -60)" fill="#141518">
+<path d="M13 42.9 A50 50 0 0 1 107 42.9" fill="none" stroke="#141518" stroke-width="7"/>
+<polygon points="110.1,51.4 112.6,40.9 101.4,45"/>
+<path d="M107 77.1 A50 50 0 0 1 13 77.1" fill="none" stroke="#141518" stroke-width="7"/>
+<polygon points="9.9,68.6 7.4,79.2 18.6,75.1"/>
+<text x="60" y="70.5" text-anchor="middle" font-family="Unbounded, 'Arial Black', Arial, sans-serif" font-weight="800" font-size="28">OPG</text>
+</g>
+</svg>
