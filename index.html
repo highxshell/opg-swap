@@ -54,7 +54,7 @@ img{max-width:100%}
 }
 
 *,*::before,*::after{box-sizing:border-box}
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
 a{color:inherit}
@@ -74,6 +74,8 @@ section[id]{scroll-margin-top:72px}
 .nav a{text-decoration:none}
 .nav a:hover{text-decoration:underline;text-underline-offset:5px;text-decoration-thickness:2px}
 @media (max-width:760px){.nav{display:none}.top .btn{margin-left:auto}}
+@media (max-width:400px){.top-in{gap:16px}.top .btn{padding:0 14px}}
+@media (max-width:359px){.top .btn{padding:0 12px}.top .btn-text{display:none}}
 
 /* buttons */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:44px;padding:0 18px;border:2px solid transparent;border-radius:4px;font-family:var(--font-mono);font-weight:600;font-size:13px;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;white-space:nowrap;cursor:pointer;transition:transform .15s ease}
@@ -163,6 +165,14 @@ h3{font-family:var(--font-display);font-weight:700;font-size:20px;line-height:1.
 @media (max-width:900px){.contacts-in{grid-template-columns:minmax(0,1fr);padding-block:56px 48px}}
 @media (max-width:480px){.stamp{grid-template-columns:minmax(0,1fr)}.cell.left{border-right:0;border-bottom:1px solid var(--panel-line)}}
 
+/* phones and touch screens: full-width main buttons, tap targets of at least 44px */
+@media (max-width:480px){.cta,.c-actions{align-self:stretch}.cta .btn{width:100%}.c-actions .btn{flex:1 1 100%}}
+@media (pointer:coarse),(max-width:760px){
+  .brand,.btn-sm{min-height:44px}
+  .linkbtn,.phone-num,.c-phone,.maplinks a,.cell dd a{display:inline-flex;align-items:center;min-height:44px}
+  .maplinks{gap:0 20px;padding-top:0}
+}
+
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn{transition:none}.btn:hover{transform:none}}
 </style>
 </head>
@@ -185,9 +195,9 @@ h3{font-family:var(--font-display);font-weight:700;font-size:20px;line-height:1.
       <a href="#swap">Как проходит свап</a>
       <a href="#contacts">Контакты</a>
     </nav>
-    <a class="btn btn-brand" href="https://wa.me/77071459117" target="_blank" rel="noopener">
+    <a class="btn btn-brand" href="https://wa.me/77071459117" target="_blank" rel="noopener" aria-label="Написать в WhatsApp">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21 L4.63 17.16 A9 9 0 1 1 8.2 20.15 Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path transform="translate(6.24 6.24) scale(0.48)" fill="currentColor" d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/></svg>
-      WhatsApp
+      <span class="btn-text">WhatsApp</span>
     </a>
   </div>
 </header>
@@ -482,22 +492,29 @@ document.querySelectorAll('[data-copy]').forEach(btn => {
     set(tip6, { cx: a6x, cy: a6y });
   }
 
-  let running = false, phi = 0, last = null, raf = 0;
+  // the engine only turns while the drawing is on screen, to spare phone batteries
+  let running = false, onScreen = true, phi = 0, last = null, raf = 0;
   function frame(t) {
     if (last !== null) phi = (phi + Math.min(t - last, 100) / 1000 * REV_PER_SEC * 2 * Math.PI) % (2 * Math.PI);
     last = t;
     pose(phi);
     raf = requestAnimationFrame(frame);
   }
+  function sync() {
+    cancelAnimationFrame(raf);
+    last = null;
+    if (running && onScreen) raf = requestAnimationFrame(frame);
+  }
   function setRunning(on) {
     running = on;
     btn.setAttribute('aria-pressed', String(on));
     btn.textContent = on ? 'Заглушить' : 'Завести';
-    cancelAnimationFrame(raf);
-    last = null;
-    if (on) raf = requestAnimationFrame(frame);
+    sync();
   }
   btn.addEventListener('click', () => setRunning(!running));
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(([entry]) => { onScreen = entry.isIntersecting; sync(); }).observe(document.querySelector('.v8'));
+  }
   pose(0);
   setRunning(!matchMedia('(prefers-reduced-motion: reduce)').matches);
 })();
